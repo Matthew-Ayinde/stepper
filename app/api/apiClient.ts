@@ -17,3 +17,25 @@ export function useCreateCustomer() {
 
   return createCustomer;
 }
+
+// login customer
+export function useLoginCustomer() {
+  async function loginCustomer(email: string, password: string) {
+    return API.post(ApiRoutes.USER.LOGIN, { email, password });
+  }
+
+  return loginCustomer;
+}
+
+// get customer profile
+export function useGetCustomerProfile() {
+  async function getCustomerProfile(token: string) {
+    return API.get(ApiRoutes.USER.PROFILE, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  return getCustomerProfile;
+}

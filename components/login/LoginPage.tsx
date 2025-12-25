@@ -16,9 +16,15 @@ import {
 } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import axios from 'axios';
+import { socketService } from '@/services/socket';
+import { subscribeToPushNotifications } from '@/utils/pushNotifications';
 
 const LoginPage = () => {
   const theme = useTheme();
+  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -27,11 +33,43 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+  
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password,
+      });
+
+      const { token, user } = response.data.data;
+
+      if (token && user) {
+        // Save token to localStorage
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
+
+        toast.success('Login successful!', {
+          description: 'Welcome back',
+        });
+
+        // Connect Socket.IO
+        socketService.connect(token);
+
+        // Subscribe to push notifications
+        subscribeToPushNotifications(token).catch((err) => {
+          console.error('Failed to subscribe to push:', err);
+        });
+
+        // Redirect to homepage
+        router.push('/');
+      }
+    } catch (error: any) {
+      console.error('Login failed:', error);
+      toast.error('Login failed', {
+        description: error.response?.data?.message || 'Invalid email or password',
+      });
+    } finally {
       setIsLoading(false);
-      console.log('Login submitted:', { email, password });
-    }, 2000);
+    }
   };
 
   const socialLogins = [

@@ -4,6 +4,8 @@ import "./globals.css";
 import Navbar from "@/components/shared/Navbar";
 import Footer from "@/components/shared/Footer";
 import { Toaster } from "sonner";
+import { SocketProvider } from "@/components/providers/SocketProvider";
+import { ConnectionStatus } from "@/components/shared/ConnectionStatus";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
@@ -28,10 +30,13 @@ export default function RootLayout({
         className={`${dmSans.variable} font-sans antialiased bg-white text-black`}
         style={{ fontFamily: 'var(--font-dm-sans)' }}
       >
-        <Toaster position="top-right" richColors />
-        <Navbar />
-        {children}
-        <Footer />
+        <SocketProvider>
+          <Toaster position="top-right" richColors />
+          <ConnectionStatus />
+          <Navbar />
+          {children}
+          <Footer />
+        </SocketProvider>
       </body>
     </html>
   );
